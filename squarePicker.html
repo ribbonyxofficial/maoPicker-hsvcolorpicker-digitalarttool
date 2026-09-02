@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Square Picker</title>
+  <style>
+    /* Rainbow Pastel Background */
+    body {
+      background: linear-gradient(135deg, #ffb3ba, #ffdfba, #ffffba, #baffc9, #bae1ff, #e8baff);
+      font-family: Tahoma, "MS Sans Serif", sans-serif;
+      font-size: 11px;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      user-select: none;
+    }
+
+    /* Windows XP Rainbow Luna Window Frame */
+    .xp-window {
+      background: #ece9d8;
+      border: 3px solid #ff4da6;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+      width: 320px;
+      box-shadow: 4px 4px 10px rgba(255, 77, 166, 0.3);
+      overflow: hidden;
+    }
+
+    .title-bar {
+      background: linear-gradient(90deg, #ffb3ba, #ffdfba, #baffc9, #bae1ff, #e8baff);
+      padding: 4px 6px;
+      font-weight: bold;
+      color: #61334c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-shadow: 1px 1px #ffffff;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+
+    .title-buttons {
+      display: flex;
+      gap: 2px;
+    }
+
+    .title-btn {
+      width: 16px;
+      height: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #fde4f2 50%, #f7c9e3 50%, #f3a6d4 100%);
+      border: 1px solid #d96cb8;
+      border-radius: 2px;
+      font-size: 9px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #61334c;
+      cursor: pointer;
+    }
+
+    .window-body {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background-color: #ece9d8;
+    }
+
+    /* XP Luna Style Button */
+    button {
+      font-family: Tahoma, "MS Sans Serif", sans-serif;
+      font-size: 11px;
+      font-weight: normal;
+      color: #000000;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid #d96cb8;
+      background: linear-gradient(180deg, #ffffff 0%, #f6f6f6 50%, #fae1ef 50%, #fcecf5 100%);
+      transition: none !important;
+      animation: none !important;
+      box-sizing: border-box;
+      box-shadow: inset 0 1px 0 #ffffff;
+    }
+
+    button:hover {
+      background: linear-gradient(180deg, #fff7d7 0%, #ffeed7 50%, #fadcba 50%, #f7c995 100%);
+      border: 1px solid #e39315;
+    }
+
+    button:active {
+      background: linear-gradient(180deg, #e1e1e1 0%, #cdcdcd 50%, #bcbcbc 50%, #cccccc 100%);
+      border: 1px solid #7f7f7f;
+      padding: 4px 7px 2px 9px;
+    }
+
+    /* Rectangular 150x98 SV Box Container via CSS */
+    .picker-container {
+      position: relative;
+      width: 250px;
+      height: 98px;
+      margin: 0 auto;
+      background: #f1f1f1;
+      border: 1px inset #7f7f7f;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .indicators-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .indicator {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2px;
+      filter: drop-shadow(0px 0px 1px #000000);
+    }
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-preview {
+      width: 40px;
+      height: 24px;
+      border: 1px inset #7f7f7f;
+      background-color: #ffb3ba;
+      box-sizing: border-box;
+    }
+
+    /* 3x3 Grid Square Palette (Exact 24x24 Sized Squares) */
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 24px);
+      gap: 3px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .palette-swatch {
+      width: 24px;
+      height: 12px;
+      border: 1px solid #7f7f7f;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+
+    .palette-swatch:active {
+      border: 1px inset #7f7f7f;
+    }
+
+    .inputs-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .input-group label {
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      font-family: Tahoma, "MS Sans Serif", sans-serif;
+      font-size: 10px;
+      padding: 2px 4px;
+      border: 1px inset #7f7f7f;
+      background: #ffffff;
+      color: #000000;
+      outline: none;
+      text-align: center;
+      flex: 1;
+      box-sizing: border-box;
+    }
+
+    /* Distinct Custom HSV Sliders with Row-by-Row Custom Gradients */
+    .sliders-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: #fcfcfc;
+      padding: 5px;
+      border: 1px inset #7f7f7f;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+    }
+
+    .slider-row label {
+      width: 10px;
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 6px;
+      border: 1px solid #7f7f7f;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    /* Hue Slider Gradient */
+    input[type="range"]#h-slider {
+      background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+    }
+
+    /* Saturation Slider Gradient */
+    input[type="range"]#s-slider {
+      background: linear-gradient(to right, #808080 0%, #ffb3ba 100%);
+    }
+
+    /* Value Slider Gradient */
+    input[type="range"]#v-slider {
+      background: linear-gradient(to right, #000000 0%, #ffb3ba 100%);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 8px;
+      height: 14px;
+      border-radius: 1px;
+      background: linear-gradient(90deg, #ffffff 0%, #fde4f2 100%);
+      border: 1px solid #d96cb8;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="xp-window">
+    <div class="title-bar">
+      <span>‧˚꒰ Color Picker - SV Box ꒱༘‧</span>
+      <div class="title-buttons">
+        <div class="title-btn">_</div>
+        <div class="title-btn">🗖</div>
+        <div class="title-btn">✕</div>
+      </div>
+    </div>
+
+    <div class="window-body">
+      <div class="picker-container" id="picker-container">
+        <canvas id="sv-canvas" width="150" height="98"></canvas>
+        <svg class="indicators-svg">
+          <circle id="sv-indicator" class="indicator" cx="0" cy="0" r="3" />
+        </svg>
+      </div>
+
+      <div class="preview-row">
+        <div id="live-preview" class="live-preview"></div>
+        <div class="palette-grid" id="palette-grid"></div>
+        <button id="eyedropper-btn" title="Custom Eyedropper">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#61334c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 2.5l7 7L9 22H2v-7L14.5 2.5z"/>
+            <path d="M12.5 5.5l6 6"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="inputs-stack">
+        <div class="input-group">
+          <label>HEX</label>
+          <input type="text" id="hex-input" value="#FFB3BA">
+          <label>RGBA</label>
+          <input type="text" id="rgba-input" value="255, 179, 186, 1">
+        </div>
+      </div>
+
+      <div class="sliders-stack">
+        <div class="slider-row">
+          <label>H</label>
+          <input type="range" id="h-slider" min="0" max="360" value="355">
+        </div>
+        <div class="slider-row">
+          <label>S</label>
+          <input type="range" id="s-slider" min="0" max="100" value="30">
+        </div>
+        <div class="slider-row">
+          <label>V</label>
+          <input type="range" id="v-slider" min="0" max="100" value="100">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svCanvas = document.getElementById('sv-canvas');
+    const svCtx = svCanvas.getContext('2d');
+
+    const svIndicator = document.getElementById('sv-indicator');
+    const livePreview = document.getElementById('live-preview');
+    const hexInput = document.getElementById('hex-input');
+    const rgbaInput = document.getElementById('rgba-input');
+    const hSlider = document.getElementById('h-slider');
+    const sSlider = document.getElementById('s-slider');
+    const vSlider = document.getElementById('v-slider');
+    const paletteGrid = document.getElementById('palette-grid');
+    const eyedropperBtn = document.getElementById('eyedropper-btn');
+
+    let currentHue = 355;
+    let currentSat = 0.3;
+    let currentVal = 1.0;
+
+    const width = 150;
+    const height = 98;
+
+    function drawSVBox() {
+      const imgData = svCtx.createImageData(width, height);
+      const data = imgData.data;
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const s = x / width;
+          const v = 1 - (y / height);
+          const rgb = hsvToRgb(currentHue, s, v);
+
+          const index = (y * width + x) * 4;
+          data[index] = rgb.r;
+          data[index + 1] = rgb.g;
+          data[index + 2] = rgb.b;
+          data[index + 3] = 255;
+        }
+      }
+      svCtx.putImageData(imgData, 0, 0);
+    }
+
+    function hsvToRgb(h, s, v) {
+      let r, g, b;
+      let i = Math.floor(h / 60) % 6;
+      let f = h / 60 - i;
+      let p = v * (1 - s);
+      let q = v * (1 - f * s);
+      let t = v * (1 - (1 - f) * s);
+
+      switch (i) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+      }
+      return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    }
+
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    function updateSliderGradients() {
+      const currentRgb = hsvToRgb(currentHue, currentSat, currentVal);
+      const hex = rgbToHex(currentRgb.r, currentRgb.g, currentRgb.b);
+
+      const grayRgb = hsvToRgb(currentHue, 0, currentVal);
+      sSlider.style.background = `linear-gradient(to right, rgb(${grayRgb.r}, ${grayRgb.g}, ${grayRgb.b}), ${hex})`;
+
+      const blackRgb = hsvToRgb(currentHue, currentSat, 0);
+      vSlider.style.background = `linear-gradient(to right, rgb(${blackRgb.r}, ${blackRgb.g}, ${blackRgb.b}), ${hex})`;
+    }
+
+    function updateColor(updateSliders = true) {
+      const rgb = hsvToRgb(currentHue, currentSat, currentVal);
+      const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+      const rgbaStr = `${rgb.r}, ${rgb.g}, ${rgb.b}, 1`;
+
+      livePreview.style.backgroundColor = hex;
+      hexInput.value = hex;
+      rgbaInput.value = rgbaStr;
+
+      if (updateSliders) {
+        hSlider.value = Math.round(currentHue);
+        sSlider.value = Math.round(currentSat * 100);
+        vSlider.value = Math.round(currentVal * 100);
+      }
+
+      svIndicator.setAttribute('cx', currentSat * width);
+      svIndicator.setAttribute('cy', (1 - currentVal) * height);
+
+      updateSliderGradients();
+    }
+
+    const pastelPalette = ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF", "#E8BAFF", "#FFC6FF", "#CAFFBF", "#9BF6FF"];
+    function initPalette() {
+      paletteGrid.innerHTML = '';
+      pastelPalette.forEach(hex => {
+        const swatch = document.createElement('div');
+        swatch.className = 'palette-swatch';
+        swatch.style.backgroundColor = hex;
+        swatch.addEventListener('click', () => {
+          hexInput.value = hex;
+          hexInput.dispatchEvent(new Event('input'));
+        });
+        paletteGrid.appendChild(swatch);
+      });
+    }
+
+    let isDraggingSV = false;
+    svCanvas.addEventListener('mousedown', (e) => { isDraggingSV = true; handleSVMove(e); });
+    window.addEventListener('mousemove', (e) => {
+      if (isDraggingSV) handleSVMove(e);
+    });
+    window.addEventListener('mouseup', () => { isDraggingSV = false; });
+
+    function handleSVMove(e) {
+      const rect = svCanvas.getBoundingClientRect();
+      let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+      let y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
+      currentSat = x / rect.width;
+      currentVal = 1 - (y / rect.height);
+      updateColor();
+    }
+
+    [hSlider, sSlider, vSlider].forEach(slider => {
+      slider.addEventListener('input', () => {
+        currentHue = parseFloat(hSlider.value);
+        currentSat = parseFloat(sSlider.value) / 100;
+        currentVal = parseFloat(vSlider.value) / 100;
+        drawSVBox();
+        updateColor(false);
+      });
+    });
+
+    hexInput.addEventListener('input', () => {
+      let val = hexInput.value.trim();
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        let r = parseInt(val.slice(1,3), 16);
+        let g = parseInt(val.slice(3,5), 16);
+        let b = parseInt(val.slice(5,7), 16);
+        livePreview.style.backgroundColor = val;
+        rgbaInput.value = `${r}, ${g}, ${b}, 1`;
+      }
+    });
+
+    eyedropperBtn.addEventListener('click', async () => {
+      if (window.EyeDropper) {
+        try {
+          const result = await new EyeDropper().open();
+          hexInput.value = result.sRGBHex;
+          hexInput.dispatchEvent(new Event('input'));
+        } catch (e) {}
+      } else {
+        alert('Eyedropper API is not supported in your browser, Sorry! :<');
+      }
+    });
+
+    drawSVBox();
+    updateColor();
+    initPalette();
+  </script>
+</body>
+</html>
