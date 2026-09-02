@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~* Windows XP Pastel Luna Studio *~</title>
+    <style>
+        :root {
+            --xp-blue: #d4d0c8;
+            --xp-title-start: #b8d4ff;
+            --xp-title-end: #639ace;
+            --xp-window-bg: #ece9d8;
+            --text-color: #000000;
+        }
+        body {
+            background-color: #ffc8dd;
+            background-image: linear-gradient(135deg, #ffc8dd 25%, #bde0fe 25%, #bde0fe 50%, #caffbf 50%, #caffbf 75%, #fdffb6 75%);
+            background-size: 40px 40px;
+            font-family: Verdana, monospace;
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+        .xp-window {
+            background: var(--xp-window-bg);
+            border: 2px solid #0055ea;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .xp-titlebar {
+            background: linear-gradient(to right, var(--xp-title-start), var(--xp-title-end));
+            padding: 6px 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-shadow: 1px 1px #002266;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        .xp-buttons {
+            display: flex;
+            gap: 3px;
+        }
+        .xp-btn {
+            background: #d4d0c8;
+            border: 1px solid #ffffff;
+            border-bottom-color: #404040;
+            border-right-color: #404040;
+            width: 16px;
+            height: 16px;
+            font-size: 0.65rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: black;
+            padding: 0;
+            box-shadow: none;
+            border-radius: 2px;
+        }
+        .xp-content {
+            padding: 12px;
+        }
+        .mode-select {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        button, select {
+            background: #ece9d8;
+            border: 2px outset #ffffff;
+            border-radius: 3px;
+            color: black;
+            padding: 4px 8px;
+            font-family: Verdana, monospace;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        button:active {
+            border-style: inset;
+            background: #d4d0c8;
+        }
+        .picker-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            min-height: 220px;
+        }
+        canvas {
+            border: 2px inset #ffffff;
+            background: #fff;
+            cursor: crosshair;
+        }
+        .preview {
+            height: 34px;
+            border: 2px inset #ffffff;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+        }
+        .sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px;
+            background: #dfdbcc;
+            padding: 6px;
+            border: 1px inset #ffffff;
+        }
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+        .slider-row span { width: 35px; }
+        .slider-row input {
+            flex-grow: 1;
+            appearance: none;
+            height: 10px;
+            border-radius: 999px;
+            outline: none;
+            border: 1px inset #ffffff;
+        }
+        #hSlider { background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red); }
+        #sSlider { background: linear-gradient(to right, gray, #ff69b4); }
+        #vSlider { background: linear-gradient(to right, black, #ff69b4); }
+
+        .section-title {
+            font-size: 0.75rem;
+            margin: 6px 0 2px 0;
+            font-weight: bold;
+        }
+        .swatches {
+            display: flex;
+            gap: 3px;
+            overflow-x: auto;
+            padding: 3px 0;
+            white-space: nowrap;
+            margin-bottom: 6px;
+        }
+        .swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #000;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .harmony-box {
+            display: flex;
+            gap: 4px;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .harmony-swatch {
+            flex: 1;
+            height: 22px;
+            border-radius: 3px;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+        .tools-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="xp-window">
+    <div class="xp-titlebar">
+        <span>🎨 MaoPicker HSV Playground</span>
+        <div class="xp-buttons">
+            <div class="xp-btn">_</div>
+            <div class="xp-btn">□</div>
+            <div class="xp-btn">X</div>
+        </div>
+    </div>
+
+    <div class="xp-content">
+        <div class="mode-select">
+            <button onclick="setMode('wheel')">⭕ Wheel</button>
+            <button onclick="setMode('square')">□ Square</button>
+            <button onclick="setMode('rect')">▭ Rect</button>
+            <button onclick="setMode('ringSquare')">🍩 Ring+Sq</button>
+            <button onclick="setMode('slider')">🎚 Sliders</button>
+        </div>
+
+        <div class="preview" id="colorPreview" style="background-color: #ff69b4;">
+            #FF69B4 | HSV(330°, 60%, 100%)
+        </div>
+
+        <div class="picker-container" id="canvasContainer">
+            <canvas id="mainCanvas" width="220" height="220" onmousedown="startPick(event)" onmousemove="onPick(event)" onmouseup="stopPick()"></canvas>
+        </div>
+
+        <div class="sliders" id="sliderControlArea">
+            <div class="slider-row">
+                <span>Hue:</span>
+                <input type="range" id="hSlider" min="0" max="360" value="330" oninput="updateFromSliders()">
+            </div>
+            <div class="slider-row">
+                <span>Sat:</span>
+                <input type="range" id="sSlider" min="0" max="100" value="60" oninput="updateFromSliders()">
+            </div>
+            <div class="slider-row">
+                <span>Val:</span>
+                <input type="range" id="vSlider" min="0" max="100" value="100" oninput="updateFromSliders()">
+            </div>
+        </div>
+
+        <div class="section-title">✨ Pastel Swatches (50+)</div>
+        <div class="swatches" id="swatchContainer"></div>
+
+        <div class="section-title">🌈 Complementary Harmony</div>
+        <div class="harmony-box" id="harmonyContainer"></div>
+
+        <div class="section-title">🎲 Fun Tools</div>
+        <div class="tools-row">
+            <button onclick="randomColor()">✨ Random</button>
+            <button onclick="invertColor()">🔮 Invert</button>
+            <button onclick="copyHex()">📋 Copy Hex</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentH = 330, currentS = 60, currentV = 100;
+    let currentMode = 'wheel';
+    let isDragging = false;
+
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const swatchContainer = document.getElementById('swatchContainer');
+    for (let i = 0; i < 55; i++) {
+        const swatch = document.createElement('div');
+        swatch.className = 'swatch';
+        const h = (i * 7) % 360;
+        const rgb = hsvToRgb(h, 75, 90);
+        swatch.style.backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        swatch.onclick = () => { currentH = h; currentS = 75; currentV = 90; renderAll(); };
+        swatchContainer.appendChild(swatch);
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        const container = document.getElementById('canvasContainer');
+
+        if (mode === 'slider') {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'flex';
+            if (mode === 'rect') {
+                canvas.width = 240; canvas.height = 160;
+            } else {
+                canvas.width = 220; canvas.height = 220;
+            }
+            renderCanvas();
+        }
+    }
+
+    function renderCanvas() {
+        const width = canvas.width;
+        const height = canvas.height;
+        const imgData = ctx.createImageData(width, height);
+        const data = imgData.data;
+
+        let cx = width / 2;
+        let cy = height / 2;
+        let radius = Math.min(cx, cy) - 5;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let index = (y * width + x) * 4;
+                let r = 255, g = 255, b = 255, a = 255;
+                let dx = x - cx;
+                let dy = y - cy;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (currentMode === 'wheel') {
+                    if (dist <= radius) {
+                        let h = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+                        let s = (dist / radius) * 100;
+                        let rgb = hsvToRgb(h, s, 100);
+                        r = rgb.r; g = rgb.g; b = rgb.b;
+                    } else { a = 0; }
+                } 
+                else if (currentMode === 'square' || currentMode === 'rect') {
+                    let s = (x / width) * 100;
+                    let v = (1 - (y / height)) * 100;
+                    let rgb = hsvToRgb(currentH, s, v);
+                    r = rgb.r; g = rgb.g; b = rgb.b;
+                }
+                else if (currentMode === 'ringSquare') {
+                    let outerRadius = 105;
+                    let innerRadius = 75;
+                    if (dist >= innerRadius && dist <= outerRadius) {
+                        let h = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+                        let rgb = hsvToRgb(h, 100, 100);
+                        r = rgb.r; g = rgb.g; b = rgb.b;
+                    } else if (dist < innerRadius) {
+                        let boxSize = innerRadius * 1.2;
+                        if (x >= cx - boxSize/2 && x <= cx + boxSize/2 && y >= cy - boxSize/2 && y <= cy + boxSize/2) {
+                            let s = ((x - (cx - boxSize/2)) / boxSize) * 100;
+                            let v = (1 - ((y - (cy - boxSize/2)) / boxSize)) * 100;
+                            let rgb = hsvToRgb(currentH, s, v);
+                            r = rgb.r; g = rgb.g; b = rgb.b;
+                        } else { a = 0; }
+                    } else { a = 0; }
+                }
+
+                data[index] = r;
+                data[index + 1] = g;
+                data[index + 2] = b;
+                data[index + 3] = a;
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    function handleInteraction(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const width = canvas.width;
+        const height = canvas.height;
+        const cx = width / 2;
+        const cy = height / 2;
+        let dx = x - cx;
+        let dy = y - cy;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (currentMode === 'wheel') {
+            let radius = Math.min(cx, cy) - 5;
+            if (dist <= radius) {
+                currentH = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+                currentS = (dist / radius) * 100;
+            }
+        } else if (currentMode === 'square' || currentMode === 'rect') {
+            currentS = Math.max(0, Math.min(100, (x / width) * 100));
+            currentV = Math.max(0, Math.min(100, (1 - (y / height)) * 100));
+        } else if (currentMode === 'ringSquare') {
+            if (dist >= 75 && dist <= 105) {
+                currentH = (Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360;
+            } else if (dist < 75) {
+                let boxSize = 75 * 1.2;
+                currentS = Math.max(0, Math.min(100, ((x - (cx - boxSize/2)) / boxSize) * 100));
+                currentV = Math.max(0, Math.min(100, (1 - ((y - (cy - boxSize/2)) / boxSize)) * 100));
+            }
+        }
+        renderAll();
+    }
+
+    function startPick(e) { isDragging = true; handleInteraction(e); }
+    function onPick(e) { if (isDragging) handleInteraction(e); }
+    function stopPick() { isDragging = false; }
+
+    function updateFromSliders() {
+        currentH = parseInt(document.getElementById('hSlider').value);
+        currentS = parseInt(document.getElementById('sSlider').value);
+        currentV = parseInt(document.getElementById('vSlider').value);
+        renderAll(false);
+    }
+
+    function renderAll(updateCanvas = true) {
+        const rgb = hsvToRgb(currentH, currentS, currentV);
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+        
+        const preview = document.getElementById('colorPreview');
+        preview.style.backgroundColor = hex;
+        preview.innerText = `${hex} | HSV(${Math.round(currentH)}°, ${Math.round(currentS)}%, ${Math.round(currentV)}%)`;
+
+        document.getElementById('hSlider').value = currentH;
+        document.getElementById('sSlider').value = currentS;
+        document.getElementById('vSlider').value = currentV;
+
+        if (updateCanvas && currentMode !== 'slider') {
+            renderCanvas();
+        }
+        updateHarmony();
+    }
+
+    function updateHarmony() {
+        const container = document.getElementById('harmonyContainer');
+        container.innerHTML = '';
+        [0, 60, 120, 180, 240].forEach(offset => {
+            let h = (currentH + offset) % 360;
+            let rgb = hsvToRgb(h, currentS, currentV);
+            let hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            let chip = document.createElement('div');
+            chip.className = 'harmony-swatch';
+            chip.style.backgroundColor = hex;
+            chip.onclick = () => { currentH = h; renderAll(); };
+            container.appendChild(chip);
+        });
+    }
+
+    function randomColor() {
+        currentH = Math.random() * 360;
+        currentS = Math.random() * 50 + 50;
+        currentV = Math.random() * 30 + 70;
+        renderAll();
+    }
+
+    function invertColor() {
+        currentH = (currentH + 180) % 360;
+        currentS = 100 - currentS;
+        currentV = 100 - currentV;
+        renderAll();
+    }
+
+    function copyHex() {
+        const rgb = hsvToRgb(currentH, currentS, currentV);
+        navigator.clipboard.writeText(rgbToHex(rgb.r, rgb.g, rgb.b));
+        alert('Copied magical code! ✨');
+    }
+
+    function hsvToRgb(h, s, v) {
+        s /= 100; v /= 100;
+        let c = v * s;
+        let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        let m = v - c;
+        let r = 0, g = 0, b = 0;
+        if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+        else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+        else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+        else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+        else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+        else if (300 <= h && h < 360) { r = c; g = 0; b = x; }
+        return {
+            r: Math.round((r + m) * 255),
+            g: Math.round((g + m) * 255),
+            b: Math.round((b + m) * 255)
+        };
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+    }
+
+    setMode('wheel');
+</script>
+
+</body>
+</html>
